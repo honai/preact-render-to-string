@@ -43,10 +43,10 @@ renderToString.render = renderToString;
  *	@param {VNode} vnode	JSX VNode to render.
  *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
  */
-let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
+let shallowRender = async (vnode, context) => await renderToString(vnode, context, SHALLOW);
 
 const EMPTY_ARR = [];
-function renderToString(vnode, context, opts) {
+async function renderToString(vnode, context, opts) {
 	context = context || {};
 	opts = opts || {};
 
@@ -58,7 +58,7 @@ function renderToString(vnode, context, opts) {
 	const previousSkipEffects = options.__s;
 	options.__s = true;
 
-	const res = _renderToString(vnode, context, opts);
+	const res = await _renderToString(vnode, context, opts);
 
 	// options._commit, we don't schedule any effects in this library right now,
 	// so we can pass an empty queue to this hook.
@@ -69,7 +69,7 @@ function renderToString(vnode, context, opts) {
 }
 
 /** The default export is an alias of `render()`. */
-function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
+async function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	if (vnode == null || typeof vnode === 'boolean') {
 		return '';
 	}
@@ -86,7 +86,7 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		let rendered = '';
 		for (let i = 0; i < vnode.length; i++) {
 			if (pretty && i > 0) rendered += '\n';
-			rendered += _renderToString(
+			rendered += await _renderToString(
 				vnode[i],
 				context,
 				opts,
@@ -110,7 +110,7 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		} else if (nodeName === Fragment) {
 			const children = [];
 			getChildren(children, vnode.props.children);
-			return _renderToString(
+			return await _renderToString(
 				children,
 				context,
 				opts,
@@ -166,7 +166,7 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 					if (renderHook) renderHook(vnode);
 
 					// stateless functional components
-					rendered = nodeName.call(vnode.__c, props, cctx);
+					rendered = await nodeName.call(vnode.__c, props, cctx);
 				}
 			} else {
 				// class-based components
@@ -220,7 +220,7 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			}
 
 			if (options.diffed) options.diffed(vnode);
-			return _renderToString(
+			return await _renderToString(
 				rendered,
 				context,
 				opts,
@@ -368,7 +368,7 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 							: nodeName === 'foreignObject'
 							? false
 							: isSvgMode,
-					ret = _renderToString(
+					ret = await _renderToString(
 						child,
 						context,
 						opts,
